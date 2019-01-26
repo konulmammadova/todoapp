@@ -1,0 +1,73 @@
+version: '3'
+
+
+services:
+  web:
+    build: .
+    command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    container_name: todoapp
+    restart: always
+    env_file: .env
+#    environment:
+#      - DEBUG=True
+#      - TIMEOUT=300
+#      - HTTP_PORT=8000
+#      - STATS_PORT=8001
+    volumes:
+      - .:/todoapp
+    ports:
+      - "8000:8000"
+    links:
+      - postgres
+    depends_on:
+      - postgres # says that we should start the postgres first before running our web services.
+      - redis # added
+
+
+  postgres:
+    container_name:  todoapp-postgres-db
+    image:           postgres:9.6.6
+    ports:
+      - 5432:5432 # Bind host port 5432 to PostgreSQL port 5432
+    volumes:
+      - ./pgdb:/var/lib/postgresql/data
+    env_file: .env
+    environment:
+      - LC_ALL=C.UTF-8
+
+  redis:
+    image: "redis:alpine"
+#  redis:
+#    image: redis:4.0.11
+#    restart: "on-failure"
+#    container_name: redis
+#    ports:
+#      - 6379:6379
+#    volumes:
+#      - ./redisdb:/var/lib/redis
+
+
+  celery:
+    build: .
+    command: celery -A todoapp worker -l info
+    volumes:
+      - .:/todoapp
+    depends_on:
+      - postgres
+      - redis
+#  celery:
+#    restart: "always"
+#    build:
+#      context: .
+#      dockerfile: celery.dockerfile
+#    container_name: celery
+#    env_file: .env
+#    command: celery --app=fauna.celery:app worker -B --loglevel=INFO
+#    volumes:
+#      - .:/src
+#    links:
+#      - redis
+#      - postgres
+#    depends_on:
+#      - "redis"
+#      - "postgres"
