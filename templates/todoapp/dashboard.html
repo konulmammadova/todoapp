@@ -5,12 +5,22 @@
     <title>Dashboard</title>
 </head>
 {% if user.is_authenticated %}
-<h1>Welcome {{ user.get_full_name }}!</h1>
+    <h1>Welcome {{ user.get_full_name }}!</h1>
 {% endif %}
 {% for task in tasks %}
-    <ul>
-        <li><a href="{{ task.get_absolute_url }}">{{ task.name }}</a></li>
-    </ul>
+    <table border="2">
+
+        <tr>
+            <th>ID</th>
+            <th>Task adi</th>
+            <th>Deadline</th>
+        </tr>
+        <tr>
+            <td>{{ task.id }}</td>
+            <td><a href="{{ task.get_absolute_url }}">{{ task.name }}</a></td>
+            <td>{{ task.deadline|date:'j F P' }}</td>
+        </tr>
+    </table>
 {% endfor %}
 <a href="{% url 'add-task' %}">Create new task</a>
 <a href="{% url 'logout' %}">Logout</a>

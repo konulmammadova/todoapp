@@ -35,23 +35,31 @@ services:
     environment:
       - LC_ALL=C.UTF-8
 
-  redis:
-    image: "redis:alpine"
 #  redis:
-#    image: redis:4.0.11
+#    image: "redis:alpine"
+##    image: redis:4.0.11
 #    restart: "on-failure"
 #    container_name: redis
 #    ports:
 #      - 6379:6379
-#    volumes:
-#      - ./redisdb:/var/lib/redis
+##    volumes:
+##      - ./redisdb:/var/lib/redis
 
+  redis:
+    image: redis:4.0.11
+    restart: "on-failure"
+    container_name: redis
+    ports:
+      - 6380:6379
 
   celery:
     build: .
     command: celery -A todoapp worker -l info
     volumes:
       - .:/todoapp
+    links:
+      - redis
+      - postgres
     depends_on:
       - postgres
       - redis

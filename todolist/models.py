@@ -17,7 +17,7 @@ class Task(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
-    deadline = models.DateField()
+    deadline = models.DateTimeField()
     slug = models.SlugField(unique=True)
 
     def __str__(self):

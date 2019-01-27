@@ -1,14 +1,18 @@
+from datetime import timedelta
+
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse_lazy
+
 from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView, FormView, ListView, RedirectView, CreateView, DetailView
 
 from todolist.forms import RegisterForm, LoginForm, AddTaskForm
 from todolist.models import Task
-from todolist.tasks import post_signup_welcome_mail
+from todolist.tasks import send_mail_alert_deadline
 
 
 class IndexView(TemplateView):
@@ -26,9 +30,6 @@ class RegisterView(FormView):
         new_user.set_password(password)
         new_user.save()
 
-        # Send the user a welcome mail
-        post_signup_welcome_mail(new_user.pk)
-
         messages.success(self.request, 'Uğurla qeydiyyatdan keçdiniz! Zəhmət olmasa daxil olun.')
         return super(RegisterView, self).form_valid(form)
 
@@ -38,11 +39,16 @@ class LoginView(FormView):
     template_name = 'todoapp/login.html'
     success_url = reverse_lazy('dashboard')
 
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return HttpResponseRedirect(self.get_success_url())
+        else:
+            return super(LoginView, self).dispatch(request, *args, **kwargs)
+
     def form_valid(self, form):
         username = form.cleaned_data.get('username')
         password = form.cleaned_data.get('password')
         user = authenticate(username=username, password=password)
-
         if user and user.is_active:
             login(self.request, user)
         return super(LoginView, self).form_valid(form)
@@ -65,12 +71,20 @@ class DashboardView(ListView):
     template_name = 'todoapp/dashboard.html'
     context_object_name = 'tasks'
 
-    # @method_decorator(login_required)
-    # def dispatch(self, *args, **kwargs):
-    #     return super(DashboardView, self).dispatch(*args, **kwargs)
+    def get_queryset(self):
+        queryset = Task.objects.filter(user=self.request.user)
+        return queryset
 
-# @login_required(login_url='login')
+    @method_decorator(login_required(login_url='/login/'))
+    def dispatch(self, request, *args, **kwargs):
+        return super(DashboardView, self).dispatch(request, *args, **kwargs)
+
+
 class AddTaskView(CreateView):
+    '''
+        View for adding new tasks
+        Also
+    '''
     model = Task
     form_class = AddTaskForm
     success_url = reverse_lazy('dashboard')
@@ -80,7 +94,14 @@ class AddTaskView(CreateView):
         task = form.save(commit=False)
         task.user = self.request.user
         task.save()
+        alert_time = task.deadline - timedelta(minutes=1)
+        print(type(alert_time))
+        send_mail_alert_deadline.apply_async((task.id,), eta=alert_time)
         return super(AddTaskView, self).form_valid(form)
+
+    @method_decorator(login_required(login_url='/login/'))
+    def dispatch(self, request, *args, **kwargs):
+        return super(AddTaskView, self).dispatch(request, *args, **kwargs)
 
 # class EditTaskView():
 #     pass
@@ -88,8 +109,6 @@ class AddTaskView(CreateView):
 # class DeleteTaskView():
 #     pass
 
-
-# @login_required(login_url='login')
 class TaskDetailView(DetailView):
     model = Task
     template_name = 'todoapp/task-detail.html'
@@ -101,3 +120,7 @@ class TaskDetailView(DetailView):
         if self.request.user.is_authenticated:
             context['created_by'] = self.request.user.get_full_name
         return context
+
+    @method_decorator(login_required(login_url='/login/'))
+    def dispatch(self, request, *args, **kwargs):
+        return super(TaskDetailView, self).dispatch(request, *args, **kwargs)

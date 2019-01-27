@@ -1,14 +1,19 @@
 # Create your tasks here
+
 from __future__ import absolute_import, unicode_literals
 from celery import shared_task
-from django.contrib.auth import get_user_model
-User = get_user_model()
+from django.core.mail import send_mail
+
+from todoapp.settings import EMAIL_HOST_USER
+from todolist.models import Task
+
 
 @shared_task
-def post_signup_welcome_mail(user_pk=None):
-    print('In post_signup_welcome_maul User PK: {}'.format(user_pk))
-    user = User.objects.filter(pk=user_pk).first()
-    if user:
-        print('Welcome user {}'.format(user.username))
-    else:
-        print('User not found')
+def send_mail_alert_deadline(task_id):
+    task = Task.objects.filter(id=task_id)
+    if task:
+        send_mail(subject='Alert',
+                  message=f'TASK: {task.name} \n DESCRIPTION: {task.description} \n DEADLINE: {task.deadline}',
+                  from_email=EMAIL_HOST_USER,
+                  recipient_list=[task.user.email],
+                  fail_silently=False)

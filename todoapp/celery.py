@@ -5,7 +5,9 @@ from celery import Celery
 # set the default Django settings module for the 'celery' program.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'todoapp.settings')
 
-app = Celery('todoap')
+# app = Celery('todoapp', broker='redis://redis:6379/')
+
+app = Celery('todoapp', broker='redis://localhost:6380/', backend='redis://localhost:6380/')
 
 # Using a string here means the worker doesn't have to serialize
 # the configuration object to child processes.
