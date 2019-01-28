@@ -4,13 +4,13 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
-from django.shortcuts import render
-from django.urls import reverse_lazy
+from django.shortcuts import render, redirect
+from django.urls import reverse_lazy, reverse
 
 from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView, FormView, ListView, RedirectView, CreateView, DetailView
 
-from todolist.forms import RegisterForm, LoginForm, AddTaskForm
+from todolist.forms import RegisterForm, LoginForm, AddTaskForm, CommentForm
 from todolist.models import Task
 from todolist.tasks import send_mail_alert_deadline
 
@@ -65,15 +65,15 @@ class LogoutView(RedirectView):
         return super(LogoutView, self).get_redirect_url(*args, **kwargs)
 
 
-# @login_required(login_url='login')
 class DashboardView(ListView):
     model = Task
     template_name = 'todoapp/dashboard.html'
+    # slug_field = 'slug'
     context_object_name = 'tasks'
 
-    def get_queryset(self):
-        queryset = Task.objects.filter(user=self.request.user)
-        return queryset
+    # def get_queryset(self):
+    #     queryset = Task.objects.filter(user=self.request.user)
+    #     return queryset
 
     @method_decorator(login_required(login_url='/login/'))
     def dispatch(self, request, *args, **kwargs):
@@ -94,9 +94,10 @@ class AddTaskView(CreateView):
         task = form.save(commit=False)
         task.user = self.request.user
         task.save()
+
         alert_time = task.deadline - timedelta(minutes=1)
-        print(type(alert_time))
         send_mail_alert_deadline.apply_async((task.id,), eta=alert_time)
+
         return super(AddTaskView, self).form_valid(form)
 
     @method_decorator(login_required(login_url='/login/'))
@@ -109,18 +110,40 @@ class AddTaskView(CreateView):
 # class DeleteTaskView():
 #     pass
 
+
 class TaskDetailView(DetailView):
     model = Task
     template_name = 'todoapp/task-detail.html'
-    slug_field = 'slug'
-    context_object_name = 'task'
-
-    def get_context_data(self, **kwargs):
-        context = super(TaskDetailView, self).get_context_data(**kwargs)
-        if self.request.user.is_authenticated:
-            context['created_by'] = self.request.user.get_full_name
-        return context
+    # slug_field = 'slug'
+    # context_object_name = 'task'
 
     @method_decorator(login_required(login_url='/login/'))
     def dispatch(self, request, *args, **kwargs):
         return super(TaskDetailView, self).dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super(TaskDetailView, self).get_context_data(**kwargs)
+        if self.request.method == 'GET':
+            form = CommentForm()
+            context['form'] = form
+        return context
+
+    def post(self, request, *args, **kwargs):
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.author = request.user
+            # ! assign the object to self
+            self.object = self.get_object()
+            comment.task = self.object
+            comment.save()
+            context = super(TaskDetailView, self).get_context_data(**kwargs)
+            context['form'] = CommentForm()
+            return self.render_to_response(context=context)
+        else:
+            # ! assign the object to self
+            self.object = self.get_object()
+            context = super(TaskDetailView, self).get_context_data(**kwargs)
+            context['form'] = form
+            return self.render_to_response(context=context)
+

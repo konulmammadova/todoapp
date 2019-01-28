@@ -19,6 +19,17 @@
             <td>{{ task.id }}</td>
             <td><a href="{{ task.get_absolute_url }}">{{ task.name }}</a></td>
             <td>{{ task.deadline|date:'j F P' }}</td>
+
+
+            {% if request.user.is_authenticated %}
+                <td>{{ task.user.username }}</td>
+
+            {% endif %}
+            {% if task.comment_set.count != 0 %}
+            <td> {{ task.comment_set.count }}</td>
+            {% endif %}
+
+
         </tr>
     </table>
 {% endfor %}

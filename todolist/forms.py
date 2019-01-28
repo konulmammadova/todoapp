@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django import forms
 
-from todolist.models import Task
+from todolist.models import Task, Comment
 
 
 class RegisterForm(forms.ModelForm):
@@ -25,3 +25,16 @@ class AddTaskForm(forms.ModelForm):
         # widgets = {
         #     'deadline': forms.DateField()
         # }
+
+
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ['content']
+
+
+class TaskPermissionForm(forms.Form):
+    username = forms.CharField(required=False)
+    email = forms.EmailField(required=False)
+    # task = forms.SelectMultiple()
+

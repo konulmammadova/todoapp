@@ -8,11 +8,6 @@ services:
     container_name: todoapp
     restart: always
     env_file: .env
-#    environment:
-#      - DEBUG=True
-#      - TIMEOUT=300
-#      - HTTP_PORT=8000
-#      - STATS_PORT=8001
     volumes:
       - .:/todoapp
     ports:
@@ -22,7 +17,7 @@ services:
     depends_on:
       - postgres # says that we should start the postgres first before running our web services.
       - redis # added
-
+      - celery
 
   postgres:
     container_name:  todoapp-postgres-db
@@ -35,26 +30,19 @@ services:
     environment:
       - LC_ALL=C.UTF-8
 
-#  redis:
-#    image: "redis:alpine"
-##    image: redis:4.0.11
-#    restart: "on-failure"
-#    container_name: redis
-#    ports:
-#      - 6379:6379
-##    volumes:
-##      - ./redisdb:/var/lib/redis
-
   redis:
     image: redis:4.0.11
     restart: "on-failure"
     container_name: redis
     ports:
       - 6380:6379
+##    volumes:
+##      - ./redisdb:/var/lib/redis
 
   celery:
     build: .
-    command: celery -A todoapp worker -l info
+    restart: always
+    command: celery -A todoapp worker --loglevel=info
     volumes:
       - .:/todoapp
     links:
@@ -63,19 +51,3 @@ services:
     depends_on:
       - postgres
       - redis
-#  celery:
-#    restart: "always"
-#    build:
-#      context: .
-#      dockerfile: celery.dockerfile
-#    container_name: celery
-#    env_file: .env
-#    command: celery --app=fauna.celery:app worker -B --loglevel=INFO
-#    volumes:
-#      - .:/src
-#    links:
-#      - redis
-#      - postgres
-#    depends_on:
-#      - "redis"
-#      - "postgres"
