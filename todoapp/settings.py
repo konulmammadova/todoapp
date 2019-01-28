@@ -78,10 +78,10 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'todoapp.wsgi.application'
 
-# logout redirect url
-LOGOUT_URL = 'logout'
+LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = '/dashboard/'
 LOGIN_ERROR_URL = '/'
+LOGOUT_URL = 'logout'  # logout redirect url
 
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
@@ -159,16 +159,14 @@ else:
         os.path.join(BASE_DIR, 'static'),
     ]
 
-# # logout redirect url
-# LOGIN_URL = 'login'
-# LOGOUT_URL = 'logout'
-# LOGIN_REDIRECT_URL = '/dashboard/'
-# LOGIN_ERROR_URL = '/'
-
-CELERY_BROKER_URL = 'redis://localhost:6380'
-CELERY_RESULT_BACKEND = 'redis://localhost:6380'
-# CELERY_BROKER_URL = 'redis://redis:6379'
-# CELERY_RESULT_BACKEND = 'redis://redis:6379'
+# CELERY_BROKER_URL = 'redis://localhost:6380'
+# CELERY_RESULT_BACKEND = 'redis://localhost:6380'
+CELERY_BROKER_URL = 'redis://redis:6379'
+CELERY_RESULT_BACKEND = 'redis://redis:6379'
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
+
+# AUTHENTICATION_BACKENDS = (
+#     'django.contrib.auth.backends.ModelBackend',  # this is defaul
+# )

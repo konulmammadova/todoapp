@@ -35,9 +35,9 @@ services:
     restart: "on-failure"
     container_name: redis
     ports:
-      - 6380:6379
-##    volumes:
-##      - ./redisdb:/var/lib/redis
+      - 6379:6379
+    volumes:
+      - ./redisdb:/var/lib/redis
 
   celery:
     build: .
@@ -49,5 +49,5 @@ services:
       - redis
       - postgres
     depends_on:
-      - postgres
       - redis
+      - postgres

@@ -1,39 +1,46 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Dashboard</title>
-</head>
-{% if user.is_authenticated %}
-    <h1>Welcome {{ user.get_full_name }}!</h1>
-{% endif %}
-{% for task in tasks %}
-    <table border="2">
+{% extends 'todoapp/base.html' %}
 
-        <tr>
-            <th>ID</th>
-            <th>Task adi</th>
-            <th>Deadline</th>
+{% block content %}
+    {% if user.is_authenticated %}
+        <h1>Welcome {{ user.get_full_name }}!</h1>
+    {% endif %}
+
+    <table class="table table-bordered">
+        <tr class="table-secondary">
+            <th class="col-md-4">Task name</th>
+            <th class="col-md-4">Deadline</th>
+            <th class="col-md-4">Created By</th>
         </tr>
-        <tr>
-            <td>{{ task.id }}</td>
-            <td><a href="{{ task.get_absolute_url }}">{{ task.name }}</a></td>
-            <td>{{ task.deadline|date:'j F P' }}</td>
+        {% for task in tasks %}
+            <tr>
+                <td class="col-md-4"><a href="{{ task.get_absolute_url }}">{{ task.name }}</a></td>
+                <td class="col-md-4">{{ task.deadline|time }} , {{ task.deadline|date }}</td>
+                <td class="col-md-4">{{ task.user.username }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+
+    <div class="row">
+        <div class="col-md-6 text-left"><a class="btn btn-primary" href="{% url 'logout' %}">Logout</a></div>
+        <div class="col-md-6 text-right"><a class="btn btn-warning" href="{% url 'add-task' %}">Create new task</a>
+        </div>
+    </div>
 
 
-            {% if request.user.is_authenticated %}
-                <td>{{ task.user.username }}</td>
 
-            {% endif %}
-            {% if task.comment_set.count != 0 %}
-            <td> {{ task.comment_set.count }}</td>
-            {% endif %}
-
-
+    <table class="table table-bordered">
+        <tr class="table-secondary">
+            <td class="col-6">
+                <del><a style="text-decoration: none" href="">
+                    item.item
+                </a></del>
+            </td>
+            <td class="col-3">
+                <center><a href="">Edit</a></center>
+            </td>
+            <td class="col-3">
+                <center><a href="">Delete</a></center>
+            </td>
         </tr>
     </table>
-{% endfor %}
-<a href="{% url 'add-task' %}">Create new task</a>
-<a href="{% url 'logout' %}">Logout</a>
-</body>
-</html>
+{% endblock %}

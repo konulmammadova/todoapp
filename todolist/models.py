@@ -1,6 +1,7 @@
 import random
 import string
 
+
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import models
@@ -19,6 +20,7 @@ class Task(models.Model):
     description = models.TextField(null=True, blank=True)
     deadline = models.DateTimeField()
     slug = models.SlugField(unique=True)
+    # allowed_users = models.ManyToManyField(User)
 
     def __str__(self):
         return f'{self.name}'
@@ -56,3 +58,10 @@ class Comment(models.Model):
 
     def __str__(self):
         return f'{self.content}'
+
+    # class Meta:
+    #     permissions = (
+    #         ('view_task', 'View task'),
+    #         ('view_comment', 'View Comment'),
+    #         ('add_comment', 'Add Comment'),
+    #     )

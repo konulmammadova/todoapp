@@ -1,36 +1,49 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>{{ task.name }}</title>
-</head>
-<body>
-    <b>Task Name: </b> {{ task.name }} <br>
-{#     <b>Task Name: </b> {{ object.name }} <br>#}
-    <b>Task Description: </b> {{ task.description }} <br>
-    <b>Task Deadline: </b> {{ task.deadline }} <br>
-    <b>Created by: </b> {{ task.user.username }}
+{% extends 'todoapp/base.html' %}
+{% block content %}
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet"
+          id="bootstrap-css">
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+    <!------ Include the above in your HEAD tag ---------->
 
-    <br>
-    <hr>
-    <h3>Comments</h3>
-    {{ created_by }}
-{#    {% if task.comment_set %}#}
-    {% for comment in task.comment_set.all %}
-        <i><h4>
-            {{ comment.author }} said: {{ comment }} at {{ comment.created_at|date }}
-        </h4></i>
-    {% empty %}
-    <p>No comments here yet :(</p>
-    {% endfor %}
-{#    {% endif %}#}
-    <form method="post">
-        {% csrf_token %}
-         {% for field in form %}
-             {{ field }}
-        {% endfor %}
-        <input type="submit" value="Comment">
-    </form>
+    <div class="container">
+        <b>Task Name: </b> {{ task.name }} <br>
+        {#     <b>Task Name: </b> {{ object.name }} <br>#}
+        <b>Task Description: </b> {{ task.description }} <br>
+        <b>Task Deadline: </b> {{ task.deadline }} <br>
+        <b>Created by: </b> {{ task.user.username }}
 
-</body>
-</html>
+        <br>
+        <hr>
+
+        <h3>Comments</h3>
+        <div class="row col-md-12">
+            {% for comment in task.comment_set.all %}
+                <div class="col-md-8">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <strong>{{ comment.author.username }}</strong>
+                            <span class="text-muted">commented at {{ comment.created_at|time }}, {{ comment.created_at|date }}</span>
+                        </div>
+                        <div class="panel-body">
+                            {{ comment }}
+                        </div><!-- /panel-body -->
+                    </div><!-- /panel panel-default -->
+                </div>
+            {% empty %}
+                <p>No comments here yet :(</p>
+            {% endfor %}
+        </div>
+        <div class="row col-md-12">
+         <div class="col-md-8">
+            <form method="post">
+                {% csrf_token %}
+                {% for field in form %}
+                    {{ field }} <br>
+                {% endfor %}
+                <input class="btn btn-success" type="submit" value="Comment">
+            </form>
+         </div>
+        </div>
+    </div>
+{% endblock %}

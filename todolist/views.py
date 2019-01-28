@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
-from django.urls import reverse_lazy, reverse
+from django.urls import reverse_lazy
 
 from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView, FormView, ListView, RedirectView, CreateView, DetailView
@@ -71,11 +71,12 @@ class DashboardView(ListView):
     # slug_field = 'slug'
     context_object_name = 'tasks'
 
-    # def get_queryset(self):
-    #     queryset = Task.objects.filter(user=self.request.user)
-    #     return queryset
 
-    @method_decorator(login_required(login_url='/login/'))
+    def get_queryset(self):
+        queryset = Task.objects.filter(user=self.request.user)
+        return queryset
+
+    @method_decorator(login_required())
     def dispatch(self, request, *args, **kwargs):
         return super(DashboardView, self).dispatch(request, *args, **kwargs)
 
@@ -100,7 +101,7 @@ class AddTaskView(CreateView):
 
         return super(AddTaskView, self).form_valid(form)
 
-    @method_decorator(login_required(login_url='/login/'))
+    @method_decorator(login_required())
     def dispatch(self, request, *args, **kwargs):
         return super(AddTaskView, self).dispatch(request, *args, **kwargs)
 
@@ -117,7 +118,7 @@ class TaskDetailView(DetailView):
     # slug_field = 'slug'
     # context_object_name = 'task'
 
-    @method_decorator(login_required(login_url='/login/'))
+    @method_decorator(login_required())
     def dispatch(self, request, *args, **kwargs):
         return super(TaskDetailView, self).dispatch(request, *args, **kwargs)
 
