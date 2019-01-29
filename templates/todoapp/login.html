@@ -1,7 +1,14 @@
 {% extends 'todoapp/base.html' %}
 {% block content %}
-    <h1>Login</h1>
-    <form class="form-inline" method="post">
+    <h1>Login</h1> <h6><a href="{% url 'register' %}">If you haven't an account register</a></h6>
+    {% if messages %}
+        {% for msg in messages %}
+            <div class="row">{{ msg }}</div>
+        {% endfor %}
+    {% endif %}
+    <br>
+    <div class="row">
+    <form method="post">
         {% csrf_token %}
         {% for field in form %}
             <div class="form-group">
@@ -15,4 +22,5 @@
         {% endfor %}
         <button type="submit" class="btn btn-primary">Login</button>
     </form>
+    </div>
 {% endblock %}
