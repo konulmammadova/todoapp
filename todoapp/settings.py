@@ -31,7 +31,7 @@ SECRET_KEY = '4lsbp2jll%o=ljjk2w)(n=pt4^acd3&cyaid46j&ng3%stpd4u'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -58,7 +58,6 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'todoapp.urls'
-# ASGI_APPLICATION = "todoapp.routing.application"
 
 TEMPLATES = [
     {
@@ -86,28 +85,16 @@ LOGOUT_URL = 'logout'  # logout redirect url
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
-if not DEBUG:  # For production docker use
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': os.environ.get('POSTGRES_DB'),
-            'USER': os.environ.get('POSTGRES_USER'),
-            'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
-            'HOST': os.environ.get('POSTGRES_HOST'),
-            'PORT': os.environ.get('POSTGRES_PORT'),
-        }
-    }
-else:
-    DATABASES = {
+DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
             'NAME': 'todoapp_db',
             'USER': 'todoapp_user',
             'PASSWORD': 'W2v86JjcDVx6yMD4',
-            'HOST': 'localhost',
+            'HOST': 'postgres',
             'PORT': '5432',
-        }
     }
+}
 
 # DATABASES = {
 #     'default': {
@@ -159,14 +146,10 @@ else:
         os.path.join(BASE_DIR, 'static'),
     ]
 
-# CELERY_BROKER_URL = 'redis://localhost:6380'
-# CELERY_RESULT_BACKEND = 'redis://localhost:6380'
+# CELERY_BROKER_URL = 'redis://localhost:6379'
+# CELERY_RESULT_BACKEND = 'redis://localhost:6379'
 CELERY_BROKER_URL = 'redis://redis:6379'
 CELERY_RESULT_BACKEND = 'redis://redis:6379'
-CELERY_ACCEPT_CONTENT = ['application/json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
-
-# AUTHENTICATION_BACKENDS = (
-#     'django.contrib.auth.backends.ModelBackend',  # this is defaul
-# )
+# CELERY_ACCEPT_CONTENT = ['application/json']
+# CELERY_TASK_SERIALIZER = 'json'
+# CELERY_RESULT_SERIALIZER = 'json'
